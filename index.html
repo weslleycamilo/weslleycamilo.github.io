@@ -234,15 +234,28 @@
             font-size: 0.9em;
         }
 
-        .btn-delete {
-            background: #ff4757;
+        .btn-action {
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.8em;
             transition: background 0.3s;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
+
+        .btn-edit {
+            background: #3498db;
+        }
+
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+
+        .btn-delete {
+            background: #ff4757;
         }
 
         .btn-delete:hover {
@@ -994,9 +1007,9 @@
                 <td>${expense.descricao}</td>
                 <td>${expense.notaFiscal}</td>
                 <td class="amount-cell" style="text-align: right;">${valorFormatted}</td>
-                <td style="text-align: center;">
-                    <button class="btn-delete" onclick="editExpense(${index})" style="background: #3498db; margin-right: 5px;">✏️ Editar</button>
-                    <button class="btn-delete" onclick="deleteExpense(${index})">🗑️ Excluir</button>
+                <td style="text-align: center; white-space: nowrap;">
+                    <button class="btn-action btn-edit" onclick="editExpense(${index})">✏️ Editar</button>
+                    <button class="btn-action btn-delete" onclick="deleteExpense(${index})">🗑️ Excluir</button>
                 </td>
             `;
 

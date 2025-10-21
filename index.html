@@ -48,7 +48,7 @@
         .header-buttons {
             position: absolute;
             top: 30px;
-            right: 30px;
+            left: 30px;
             display: flex;
             gap: 10px;
         }
@@ -372,6 +372,55 @@
             background: #f44336;
         }
 
+        .privacy-notice {
+            padding: 60px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .privacy-notice-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .privacy-notice h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .privacy-notice p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .privacy-notice .btn-configure {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .privacy-notice .btn-configure:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .content-locked {
+            display: none;
+        }
+
+        .content-unlocked {
+            display: block;
+        }
+
         .modal-buttons {
             display: flex;
             gap: 10px;
@@ -437,7 +486,16 @@
             <p>Reforma da Igreja - União Sul Brasileira</p>
         </div>
 
-        <div class="summary">
+        <!-- Privacy Notice (shown when not configured) -->
+        <div class="privacy-notice" id="privacyNotice">
+            <div class="privacy-notice-icon">🔒</div>
+            <h2>Dados Protegidos</h2>
+            <p>Para acessar o controle de gastos, você precisa configurar o GitHub primeiro.<br>
+            Isso garante que seus dados financeiros permaneçam seguros e privados.</p>
+            <button class="btn-configure" onclick="showSettingsModal()">🔐 Configurar GitHub Agora</button>
+        </div>
+
+        <div class="summary content-locked" id="summarySection">
             <div class="summary-card">
                 <h3>Total de Notas</h3>
                 <div class="amount" id="totalNotes">0</div>
@@ -452,7 +510,7 @@
             </div>
         </div>
 
-        <div class="input-section">
+        <div class="input-section content-locked" id="inputSection">
             <h2>➕ Adicionar Nova Despesa</h2>
             <div class="message success" id="successMessage">
                 ✓ Despesa adicionada com sucesso!
@@ -486,7 +544,7 @@
             </form>
         </div>
 
-        <div class="expenses-table">
+        <div class="expenses-table content-locked" id="expensesSection">
             <h2 style="margin-bottom: 10px;">Detalhamento de Gastos</h2>
             <div id="loadingIndicator" class="loading">Carregando dados</div>
             <table id="expensesTable" style="display: none;">
@@ -623,6 +681,38 @@
                     statusIndicator.className = 'status-indicator disconnected';
                     statusText.textContent = 'Não conectado';
                 }
+            }
+
+            // Update content visibility based on token
+            updateContentVisibility();
+        }
+
+        // Toggle content visibility based on GitHub configuration
+        function updateContentVisibility() {
+            const hasToken = githubConfig.token && githubConfig.token.length > 0;
+            const privacyNotice = document.getElementById('privacyNotice');
+            const summarySection = document.getElementById('summarySection');
+            const inputSection = document.getElementById('inputSection');
+            const expensesSection = document.getElementById('expensesSection');
+
+            if (hasToken) {
+                // Hide privacy notice, show content
+                privacyNotice.style.display = 'none';
+                summarySection.classList.remove('content-locked');
+                summarySection.classList.add('content-unlocked');
+                inputSection.classList.remove('content-locked');
+                inputSection.classList.add('content-unlocked');
+                expensesSection.classList.remove('content-locked');
+                expensesSection.classList.add('content-unlocked');
+            } else {
+                // Show privacy notice, hide content
+                privacyNotice.style.display = 'block';
+                summarySection.classList.add('content-locked');
+                summarySection.classList.remove('content-unlocked');
+                inputSection.classList.add('content-locked');
+                inputSection.classList.remove('content-unlocked');
+                expensesSection.classList.add('content-locked');
+                expensesSection.classList.remove('content-unlocked');
             }
         }
 
@@ -772,6 +862,12 @@
 
         // Load data from GitHub
         async function loadFromGitHub() {
+            // Check if GitHub is configured
+            if (!githubConfig.token) {
+                showMessage('info', 'ℹ️ Configure o GitHub para acessar os dados');
+                return;
+            }
+
             showMessage('info', '🔄 Carregando dados do GitHub...');
             document.getElementById('loadingIndicator').style.display = 'block';
             document.getElementById('expensesTable').style.display = 'none';
@@ -792,20 +888,8 @@
                 document.getElementById('expensesTable').style.display = 'table';
             } catch (error) {
                 console.error('Erro ao carregar dados:', error);
-                showMessage('error', '❌ Erro ao carregar dados do GitHub. Usando dados locais.');
-
-                // Load default data if GitHub fails
-                expenses = [
-                    {date: "2025-09-29", fornecedor: "Perci Reis & Cia LTDA", descricao: "Tijolos 11,5x19x19", notaFiscal: "NF-e 11780", valor: 1400.00},
-                    {date: "2025-10-01", fornecedor: "José Carlos Montibeler", descricao: "Serviços de reforma em geral", notaFiscal: "NFS-e 1", valor: 6000.00},
-                    {date: "2025-10-07", fornecedor: "Águas Claras Materiais", descricao: "Cimento, Cal, Ferro 5/16", notaFiscal: "NF-e 104483", valor: 647.41},
-                    {date: "2025-10-13", fornecedor: "Perci Reis & Cia LTDA", descricao: "Tijolos 11,5x19x19", notaFiscal: "NF-e 11805", valor: 149.00},
-                    {date: "2025-10-15", fornecedor: "Prime Forros e Divisórias", descricao: "Forro PVC, Perfis, Roda forro", notaFiscal: "NF-e 128", valor: 3500.00},
-                    {date: "2025-10-15", fornecedor: "Alverbs Materiais Elétricos", descricao: "Quadro distribuição, cabos, fita isolante, plafon LED", notaFiscal: "NF-e 35", valor: 1580.00},
-                    {date: "2025-08-18", fornecedor: "SB Aquecedores", descricao: "Broca para concreto, Caixa de descarga", notaFiscal: "Relatório Gerencial", valor: 53.05},
-                    {date: "2025-09-26", fornecedor: "DANFE - Comercio", descricao: "Areia fina (transporte)", notaFiscal: "NF 47813", valor: 475.00}
-                ];
-
+                showMessage('error', '❌ Erro ao carregar dados do GitHub.');
+                expenses = [];
                 renderExpenses();
                 document.getElementById('loadingIndicator').style.display = 'none';
                 document.getElementById('expensesTable').style.display = 'table';
@@ -918,6 +1002,12 @@
 
         // Export data as JSON
         function exportData() {
+            if (!githubConfig.token) {
+                showMessage('error', '❌ Configure o GitHub primeiro para exportar dados');
+                showSettingsModal();
+                return;
+            }
+
             const dataStr = JSON.stringify({expenses: expenses}, null, 2);
             const dataBlob = new Blob([dataStr], {type: 'application/json'});
             const url = URL.createObjectURL(dataBlob);
@@ -929,11 +1019,16 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
 
-            showMessage('success', '✓ Arquivo JSON exportado! Agora faça upload no GitHub.');
+            showMessage('success', '✓ Arquivo JSON exportado!');
         }
 
         // Show import modal
         function showImportModal() {
+            if (!githubConfig.token) {
+                showMessage('error', '❌ Configure o GitHub primeiro para importar dados');
+                showSettingsModal();
+                return;
+            }
             document.getElementById('importModal').classList.add('show');
         }
 

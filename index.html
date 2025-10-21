@@ -521,12 +521,16 @@
         </div>
 
         <div class="input-section content-locked" id="inputSection" style="display: none;">
-            <h2>➕ Adicionar Nova Despesa</h2>
+            <h2 id="formTitle">➕ Adicionar Nova Despesa</h2>
             <div class="message success" id="successMessage">
                 ✓ Despesa adicionada com sucesso!
             </div>
             <div class="message info" id="infoMessage"></div>
             <div class="message error" id="errorMessage"></div>
+            <div id="editModeIndicator" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                <strong>✏️ Modo de Edição</strong>
+                <button onclick="cancelEdit()" style="float: right; background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Cancelar Edição</button>
+            </div>
             <form id="expenseForm">
                 <div class="form-grid">
                     <div class="form-group">
@@ -550,7 +554,7 @@
                         <input type="text" id="inputValor" placeholder="1.234,56" required>
                     </div>
                 </div>
-                <button type="submit" class="btn-add">➕ Adicionar Despesa</button>
+                <button type="submit" class="btn-add" id="submitBtn">➕ Adicionar Despesa</button>
             </form>
         </div>
 
@@ -645,6 +649,7 @@
         const GITHUB_DATA_URL = 'https://raw.githubusercontent.com/weslleycamilo/weslleycamilo.github.io/main/expenses.json';
 
         let expenses = [];
+        let editingIndex = -1; // -1 means not editing, >= 0 means editing that index
         let githubConfig = {
             token: '',
             owner: 'weslleycamilo',
@@ -989,7 +994,10 @@
                 <td>${expense.descricao}</td>
                 <td>${expense.notaFiscal}</td>
                 <td class="amount-cell" style="text-align: right;">${valorFormatted}</td>
-                <td style="text-align: center;"><button class="btn-delete" onclick="deleteExpense(${index})">🗑️ Excluir</button></td>
+                <td style="text-align: center;">
+                    <button class="btn-delete" onclick="editExpense(${index})" style="background: #3498db; margin-right: 5px;">✏️ Editar</button>
+                    <button class="btn-delete" onclick="deleteExpense(${index})">🗑️ Excluir</button>
+                </td>
             `;
 
             return row;
@@ -1014,8 +1022,7 @@
                 return;
             }
 
-            // Add to expenses array
-            const newExpense = {
+            const expenseData = {
                 date: date,
                 fornecedor: fornecedor,
                 descricao: descricao,
@@ -1023,25 +1030,80 @@
                 valor: parseFloat(valorNum.toFixed(2))
             };
 
-            expenses.push(newExpense);
+            if (editingIndex >= 0) {
+                // UPDATE mode
+                expenses[editingIndex] = expenseData;
 
-            // Re-render
-            renderExpenses();
+                // Re-render
+                renderExpenses();
 
-            // Show success message
-            showMessage('success', '✓ Despesa adicionada!');
+                // Show success message
+                showMessage('success', '✓ Despesa atualizada!');
 
-            // Clear form
-            this.reset();
-            document.getElementById('inputDate').valueAsDate = new Date();
+                // Reset edit mode
+                cancelEdit();
 
-            // Auto-commit to GitHub if configured
-            if (githubConfig.token) {
-                await commitToGitHub(`Add expense: ${fornecedor} - ${descricao}`);
+                // Auto-commit to GitHub if configured
+                if (githubConfig.token) {
+                    await commitToGitHub(`Update expense: ${fornecedor} - ${descricao}`);
+                }
             } else {
-                showMessage('info', 'ℹ️ Configure o GitHub para salvar automaticamente');
+                // ADD mode
+                expenses.push(expenseData);
+
+                // Re-render
+                renderExpenses();
+
+                // Show success message
+                showMessage('success', '✓ Despesa adicionada!');
+
+                // Clear form
+                this.reset();
+                document.getElementById('inputDate').valueAsDate = new Date();
+
+                // Auto-commit to GitHub if configured
+                if (githubConfig.token) {
+                    await commitToGitHub(`Add expense: ${fornecedor} - ${descricao}`);
+                } else {
+                    showMessage('info', 'ℹ️ Configure o GitHub para salvar automaticamente');
+                }
             }
         });
+
+        // Edit expense
+        function editExpense(index) {
+            editingIndex = index;
+            const expense = expenses[index];
+
+            // Populate form with expense data
+            document.getElementById('inputDate').value = expense.date;
+            document.getElementById('inputFornecedor').value = expense.fornecedor;
+            document.getElementById('inputDescricao').value = expense.descricao;
+            document.getElementById('inputNotaFiscal').value = expense.notaFiscal;
+            document.getElementById('inputValor').value = expense.valor.toFixed(2).replace('.', ',');
+
+            // Update UI to show edit mode
+            document.getElementById('formTitle').textContent = '✏️ Editar Despesa';
+            document.getElementById('submitBtn').textContent = '💾 Atualizar Despesa';
+            document.getElementById('editModeIndicator').style.display = 'block';
+
+            // Scroll to form
+            document.getElementById('inputSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Cancel edit mode
+        function cancelEdit() {
+            editingIndex = -1;
+
+            // Reset form
+            document.getElementById('expenseForm').reset();
+            document.getElementById('inputDate').valueAsDate = new Date();
+
+            // Update UI to show add mode
+            document.getElementById('formTitle').textContent = '➕ Adicionar Nova Despesa';
+            document.getElementById('submitBtn').textContent = '➕ Adicionar Despesa';
+            document.getElementById('editModeIndicator').style.display = 'none';
+        }
 
         // Delete expense
         async function deleteExpense(index) {
@@ -1050,6 +1112,14 @@
                 expenses.splice(index, 1);
                 renderExpenses();
                 showMessage('info', 'Despesa excluída.');
+
+                // If we were editing this expense, cancel edit mode
+                if (editingIndex === index) {
+                    cancelEdit();
+                } else if (editingIndex > index) {
+                    // Adjust editingIndex if we deleted an item before it
+                    editingIndex--;
+                }
 
                 // Auto-commit to GitHub if configured
                 if (githubConfig.token) {

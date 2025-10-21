@@ -1278,10 +1278,21 @@
                 doc.setFontSize(12);
                 doc.text('Reforma IASD Azambuja ', 14, 28);
 
-                // Add date
+                // Add date and sort info
                 doc.setFontSize(10);
                 const today = new Date().toLocaleDateString('pt-BR');
                 doc.text(`Relatório gerado em: ${today}`, 14, 35);
+
+                // Show current sort
+                const sortLabels = {
+                    'date': 'Data',
+                    'fornecedor': 'Fornecedor',
+                    'descricao': 'Descrição',
+                    'notaFiscal': 'Nota Fiscal',
+                    'valor': 'Valor'
+                };
+                const sortDirText = sortDirection === 'asc' ? 'crescente' : 'decrescente';
+                doc.text(`Ordenado por: ${sortLabels[sortColumn]} (${sortDirText})`, 14, 40);
 
                 // Calculate summary
                 let total = 0;
@@ -1295,33 +1306,59 @@
 
                 // Add summary box
                 doc.setFontSize(11);
-                doc.text(`Total de Notas Fiscais: ${uniqueCount}`, 14, 45);
-                doc.text(`Total Gasto: ${total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`, 14, 52);
-                doc.text(`Média por Nota: ${avg.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`, 14, 59);
+                doc.text(`Total de Notas Fiscais: ${uniqueCount}`, 14, 50);
+                doc.text(`Total Gasto: ${total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`, 14, 57);
+                doc.text(`Média por Nota: ${avg.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`, 14, 64);
 
-                // Prepare table data
-                const tableData = expenses
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .map(expense => {
-                        const dateObj = new Date(expense.date + 'T00:00:00');
-                        const dateFormatted = dateObj.toLocaleDateString('pt-BR');
-                        const valorFormatted = expense.valor.toLocaleString('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL'
-                        });
+                // Prepare table data (use current sort from UI)
+                // Create a copy and sort it the same way as the UI
+                const sortedExpenses = [...expenses];
+                sortedExpenses.sort((a, b) => {
+                    let aVal = a[sortColumn];
+                    let bVal = b[sortColumn];
 
-                        return [
-                            dateFormatted,
-                            expense.fornecedor,
-                            expense.descricao,
-                            expense.notaFiscal,
-                            valorFormatted
-                        ];
+                    if (sortColumn === 'date') {
+                        aVal = new Date(aVal);
+                        bVal = new Date(bVal);
+                    }
+
+                    if (sortColumn === 'valor') {
+                        aVal = parseFloat(aVal);
+                        bVal = parseFloat(bVal);
+                    }
+
+                    if (typeof aVal === 'string') {
+                        aVal = aVal.toLowerCase();
+                        bVal = bVal.toLowerCase();
+                    }
+
+                    let comparison = 0;
+                    if (aVal > bVal) comparison = 1;
+                    if (aVal < bVal) comparison = -1;
+
+                    return sortDirection === 'asc' ? comparison : -comparison;
+                });
+
+                const tableData = sortedExpenses.map(expense => {
+                    const dateObj = new Date(expense.date + 'T00:00:00');
+                    const dateFormatted = dateObj.toLocaleDateString('pt-BR');
+                    const valorFormatted = expense.valor.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
                     });
+
+                    return [
+                        dateFormatted,
+                        expense.fornecedor,
+                        expense.descricao,
+                        expense.notaFiscal,
+                        valorFormatted
+                    ];
+                });
 
                 // Add table
                 doc.autoTable({
-                    startY: 68,
+                    startY: 73,
                     head: [['Data', 'Fornecedor', 'Descrição', 'Nota Fiscal', 'Valor']],
                     body: tableData,
                     theme: 'striped',

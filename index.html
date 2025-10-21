@@ -487,7 +487,7 @@
         </div>
 
         <!-- Privacy Notice (shown when not configured) -->
-        <div class="privacy-notice" id="privacyNotice">
+        <div class="privacy-notice" id="privacyNotice" style="display: block;">
             <div class="privacy-notice-icon">🔒</div>
             <h2>Dados Protegidos</h2>
             <p>Para acessar o controle de gastos, você precisa configurar o GitHub primeiro.<br>
@@ -495,7 +495,7 @@
             <button class="btn-configure" onclick="showSettingsModal()">🔐 Configurar GitHub Agora</button>
         </div>
 
-        <div class="summary content-locked" id="summarySection">
+        <div class="summary content-locked" id="summarySection" style="display: none;">
             <div class="summary-card">
                 <h3>Total de Notas</h3>
                 <div class="amount" id="totalNotes">0</div>
@@ -510,7 +510,7 @@
             </div>
         </div>
 
-        <div class="input-section content-locked" id="inputSection">
+        <div class="input-section content-locked" id="inputSection" style="display: none;">
             <h2>➕ Adicionar Nova Despesa</h2>
             <div class="message success" id="successMessage">
                 ✓ Despesa adicionada com sucesso!
@@ -544,7 +544,7 @@
             </form>
         </div>
 
-        <div class="expenses-table content-locked" id="expensesSection">
+        <div class="expenses-table content-locked" id="expensesSection" style="display: none;">
             <h2 style="margin-bottom: 10px;">Detalhamento de Gastos</h2>
             <div id="loadingIndicator" class="loading">Carregando dados</div>
             <table id="expensesTable" style="display: none;">
@@ -698,21 +698,15 @@
             if (hasToken) {
                 // Hide privacy notice, show content
                 privacyNotice.style.display = 'none';
-                summarySection.classList.remove('content-locked');
-                summarySection.classList.add('content-unlocked');
-                inputSection.classList.remove('content-locked');
-                inputSection.classList.add('content-unlocked');
-                expensesSection.classList.remove('content-locked');
-                expensesSection.classList.add('content-unlocked');
+                summarySection.style.display = 'grid';
+                inputSection.style.display = 'block';
+                expensesSection.style.display = 'block';
             } else {
                 // Show privacy notice, hide content
                 privacyNotice.style.display = 'block';
-                summarySection.classList.add('content-locked');
-                summarySection.classList.remove('content-unlocked');
-                inputSection.classList.add('content-locked');
-                inputSection.classList.remove('content-unlocked');
-                expensesSection.classList.add('content-locked');
-                expensesSection.classList.remove('content-unlocked');
+                summarySection.style.display = 'none';
+                inputSection.style.display = 'none';
+                expensesSection.style.display = 'none';
             }
         }
 
@@ -746,9 +740,12 @@
             }
 
             saveGitHubConfig();
-            updateConnectionStatus();
+            updateConnectionStatus(); // This will show the content
             closeSettingsModal();
             showMessage('success', '✓ Configurações do GitHub salvas!');
+
+            // Load data now that GitHub is configured
+            loadFromGitHub();
         }
 
         // Test GitHub connection
@@ -857,7 +854,12 @@
         // Load data on page load
         window.addEventListener('load', () => {
             loadGitHubConfig();
-            loadFromGitHub();
+            updateConnectionStatus(); // This will call updateContentVisibility()
+
+            // Only load data if GitHub is configured
+            if (githubConfig.token) {
+                loadFromGitHub();
+            }
         });
 
         // Load data from GitHub

@@ -1,60 +1,53 @@
 {
-    "expenses": [
-      {
-        "date": "2025-08-18",
-        "fornecedor": "SB Aquecedores",
-        "descricao": "Broca para concreto, Caixa de descarga",
-        "notaFiscal": "Relatório Gerencial",
-        "valor": 53.05
-      },
-      {
-        "date": "2025-09-26",
-        "fornecedor": "DANFE - Comercio",
-        "descricao": "Areia fina (transporte)",
-        "notaFiscal": "NF 47813",
-        "valor": 475.00
-      },
-      {
-        "date": "2025-09-29",
-        "fornecedor": "Perci Reis & Cia LTDA",
-        "descricao": "Tijolos 11,5x19x19",
-        "notaFiscal": "NF-e 11780",
-        "valor": 1400.00
-      },
-      {
-        "date": "2025-10-01",
-        "fornecedor": "José Carlos Montibeler",
-        "descricao": "Serviços de reforma em geral",
-        "notaFiscal": "NFS-e 1",
-        "valor": 6000.00
-      },
-      {
-        "date": "2025-10-07",
-        "fornecedor": "Águas Claras Materiais",
-        "descricao": "Cimento, Cal, Ferro 5/16",
-        "notaFiscal": "NF-e 104483",
-        "valor": 647.41
-      },
-      {
-        "date": "2025-10-13",
-        "fornecedor": "Perci Reis & Cia LTDA",
-        "descricao": "Tijolos 11,5x19x19",
-        "notaFiscal": "NF-e 11805",
-        "valor": 149.00
-      },
-      {
-        "date": "2025-10-15",
-        "fornecedor": "Alverbs Materiais Elétricos",
-        "descricao": "Quadro distribuição, cabos, fita isolante, plafon LED",
-        "notaFiscal": "NF-e 35",
-        "valor": 1580.00
-      },
-      {
-        "date": "2025-10-15",
-        "fornecedor": "Prime Forros e Divisórias",
-        "descricao": "Forro PVC, Perfis, Roda forro",
-        "notaFiscal": "NF-e 128",
-        "valor": 3500.00
-      }
-    ]
-  }
+  "expenses": [
+    {
+      "date": "2025-10-15",
+      "fornecedor": "Alverbs Materiais Elétricos",
+      "descricao": "Quadro distribuição, cabos, fita isolante, plafon LED",
+      "notaFiscal": "NF-e 35",
+      "valor": 1580
+    },
+    {
+      "date": "2025-10-13",
+      "fornecedor": "Perci Reis & Cia LTDA",
+      "descricao": "Tijolos 11,5x19x19",
+      "notaFiscal": "NF-e 11805",
+      "valor": 149
+    },
+    {
+      "date": "2025-10-07",
+      "fornecedor": "Águas Claras Materiais",
+      "descricao": "Cimento, Cal, Ferro 5/16",
+      "notaFiscal": "NF-e 104483",
+      "valor": 647.41
+    },
+    {
+      "date": "2025-10-01",
+      "fornecedor": "José Carlos Montibeler",
+      "descricao": "Serviços de reforma em geral",
+      "notaFiscal": "NFS-e 1",
+      "valor": 6000
+    },
+    {
+      "date": "2025-09-29",
+      "fornecedor": "Perci Reis & Cia LTDA",
+      "descricao": "Tijolos 11,5x19x19",
+      "notaFiscal": "NF-e 11780",
+      "valor": 1400
+    },
+    {
+      "date": "2025-09-26",
+      "fornecedor": "DANFE - Comercio",
+      "descricao": "Areia fina (transporte)",
+      "notaFiscal": "NF 47813",
+      "valor": 475
+    },
+    {
+      "date": "2025-08-18",
+      "fornecedor": "SB Aquecedores",
+      "descricao": "Broca para concreto, Caixa de descarga",
+      "notaFiscal": "Relatório Gerencial",
+      "valor": 53.05
+    }
+  ]
+}

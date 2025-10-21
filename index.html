@@ -1194,15 +1194,17 @@
         // Update summary
         function updateSummary() {
             let total = 0;
+            const uniqueNotasFiscais = new Set();
 
             expenses.forEach(expense => {
                 total += expense.valor;
+                uniqueNotasFiscais.add(expense.notaFiscal);
             });
 
-            const count = expenses.length;
-            const avg = count > 0 ? total / count : 0;
+            const uniqueCount = uniqueNotasFiscais.size;
+            const avg = uniqueCount > 0 ? total / uniqueCount : 0;
 
-            document.getElementById('totalNotes').textContent = count;
+            document.getElementById('totalNotes').textContent = uniqueCount;
             document.getElementById('totalAmount').textContent = total.toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'

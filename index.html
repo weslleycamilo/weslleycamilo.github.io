@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -499,6 +501,7 @@
         <div class="header">
             <div class="header-buttons-left">
                 <button class="btn-header" onclick="exportData()">📥 Exportar JSON</button>
+                <button class="btn-header" onclick="exportPDF()">📄 Exportar PDF</button>
                 <button class="btn-header" onclick="showImportModal()">📤 Importar JSON</button>
             </div>
             <div class="header-buttons-right">
@@ -506,7 +509,7 @@
                 <button class="btn-header settings" id="settingsBtn" onclick="showSettingsModal()">⚙️ Configurar GitHub</button>
             </div>
             <h1>📊 Controle de Gastos</h1>
-            <p>Reforma da Igreja - União Sul Brasileira</p>
+            <p>Reforma IASD Azambuja </p>
         </div>
 
         <!-- Privacy Notice (shown when not configured) -->
@@ -1161,6 +1164,114 @@
             URL.revokeObjectURL(url);
 
             showMessage('success', '✓ Arquivo JSON exportado!');
+        }
+
+        // Export data as PDF
+        function exportPDF() {
+            if (!githubConfig.token) {
+                showMessage('error', '❌ Configure o GitHub primeiro para exportar dados');
+                showSettingsModal();
+                return;
+            }
+
+            if (expenses.length === 0) {
+                showMessage('error', '❌ Não há despesas para exportar');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // Add title
+                doc.setFontSize(18);
+                doc.text('Controle de Gastos', 14, 20);
+                doc.setFontSize(12);
+                doc.text('Reforma IASD Azambuja ', 14, 28);
+
+                // Add date
+                doc.setFontSize(10);
+                const today = new Date().toLocaleDateString('pt-BR');
+                doc.text(`Relatório gerado em: ${today}`, 14, 35);
+
+                // Calculate summary
+                let total = 0;
+                const uniqueNotasFiscais = new Set();
+                expenses.forEach(expense => {
+                    total += expense.valor;
+                    uniqueNotasFiscais.add(expense.notaFiscal);
+                });
+                const uniqueCount = uniqueNotasFiscais.size;
+                const avg = uniqueCount > 0 ? total / uniqueCount : 0;
+
+                // Add summary box
+                doc.setFontSize(11);
+                doc.text(`Total de Notas Fiscais: ${uniqueCount}`, 14, 45);
+                doc.text(`Total Gasto: ${total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`, 14, 52);
+                doc.text(`Média por Nota: ${avg.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})}`, 14, 59);
+
+                // Prepare table data
+                const tableData = expenses
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(expense => {
+                        const dateObj = new Date(expense.date + 'T00:00:00');
+                        const dateFormatted = dateObj.toLocaleDateString('pt-BR');
+                        const valorFormatted = expense.valor.toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                        });
+
+                        return [
+                            dateFormatted,
+                            expense.fornecedor,
+                            expense.descricao,
+                            expense.notaFiscal,
+                            valorFormatted
+                        ];
+                    });
+
+                // Add table
+                doc.autoTable({
+                    startY: 68,
+                    head: [['Data', 'Fornecedor', 'Descrição', 'Nota Fiscal', 'Valor']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [102, 126, 234],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 3
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 22 },  // Data
+                        1: { cellWidth: 40 },  // Fornecedor
+                        2: { cellWidth: 50 },  // Descrição
+                        3: { cellWidth: 35 },  // Nota Fiscal
+                        4: { cellWidth: 30, halign: 'right' }  // Valor
+                    },
+                    foot: [[
+                        { content: 'TOTAL GERAL', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+                        { content: total.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}), styles: { halign: 'right', fontStyle: 'bold', fillColor: [240, 244, 255] } }
+                    ]],
+                    footStyles: {
+                        fillColor: [240, 244, 255],
+                        textColor: [102, 126, 234],
+                        fontStyle: 'bold'
+                    }
+                });
+
+                // Save the PDF
+                const fileName = `controle-gastos-${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+
+                showMessage('success', '✓ Arquivo PDF exportado!');
+            } catch (error) {
+                console.error('Erro ao exportar PDF:', error);
+                showMessage('error', '❌ Erro ao exportar PDF: ' + error.message);
+            }
         }
 
         // Show import modal

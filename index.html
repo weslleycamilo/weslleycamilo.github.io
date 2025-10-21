@@ -45,10 +45,18 @@
             font-size: 1.1em;
         }
 
-        .header-buttons {
+        .header-buttons-left {
             position: absolute;
             top: 30px;
             left: 30px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-buttons-right {
+            position: absolute;
+            top: 30px;
+            right: 30px;
             display: flex;
             gap: 10px;
         }
@@ -476,9 +484,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-buttons">
+            <div class="header-buttons-left">
                 <button class="btn-header" onclick="exportData()">📥 Exportar JSON</button>
                 <button class="btn-header" onclick="showImportModal()">📤 Importar JSON</button>
+            </div>
+            <div class="header-buttons-right">
                 <button class="btn-header" onclick="loadFromGitHub()">🔄 Recarregar</button>
                 <button class="btn-header settings" id="settingsBtn" onclick="showSettingsModal()">⚙️ Configurar GitHub</button>
             </div>
@@ -624,6 +634,7 @@
             <div class="modal-buttons">
                 <button class="btn-modal btn-primary" onclick="saveGitHubSettings()">💾 Salvar</button>
                 <button class="btn-modal btn-secondary" onclick="testGitHubConnection()">🔍 Testar Conexão</button>
+                <button class="btn-modal btn-secondary" onclick="clearGitHubToken()" style="background: #e74c3c;">🗑️ Limpar Token</button>
                 <button class="btn-modal btn-secondary" onclick="closeSettingsModal()">Cancelar</button>
             </div>
         </div>
@@ -748,6 +759,31 @@
             loadFromGitHub();
         }
 
+        // Clear GitHub token and reset to privacy mode
+        function clearGitHubToken() {
+            if (confirm('Tem certeza que deseja limpar o token? Você precisará configurar novamente para acessar os dados.')) {
+                // Clear the config
+                githubConfig.token = '';
+                githubConfig.owner = 'weslleycamilo';
+                githubConfig.repo = 'weslleycamilo.github.io';
+                githubConfig.branch = 'main';
+                githubConfig.filePath = 'expenses.json';
+
+                // Clear localStorage
+                localStorage.removeItem('githubConfig');
+
+                // Clear expenses
+                expenses = [];
+
+                // Update UI
+                updateConnectionStatus();
+                closeSettingsModal();
+                renderExpenses();
+
+                showMessage('info', 'ℹ️ Token removido. Configure novamente para acessar os dados.');
+            }
+        }
+
         // Test GitHub connection
         async function testGitHubConnection() {
             const token = document.getElementById('githubToken').value.trim();
@@ -848,8 +884,25 @@
             }
         }
 
-        // Set today's date as default
-        document.getElementById('inputDate').valueAsDate = new Date();
+        // Initialize on page load - BEFORE DOM is ready
+        // This ensures privacy notice shows first
+        (function() {
+            // Ensure privacy notice is shown by default
+            const privacyNotice = document.getElementById('privacyNotice');
+            const summarySection = document.getElementById('summarySection');
+            const inputSection = document.getElementById('inputSection');
+            const expensesSection = document.getElementById('expensesSection');
+
+            if (privacyNotice) privacyNotice.style.display = 'block';
+            if (summarySection) summarySection.style.display = 'none';
+            if (inputSection) inputSection.style.display = 'none';
+            if (expensesSection) expensesSection.style.display = 'none';
+        })();
+
+        // Set today's date as default when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputDate').valueAsDate = new Date();
+        });
 
         // Load data on page load
         window.addEventListener('load', () => {
@@ -859,6 +912,9 @@
             // Only load data if GitHub is configured
             if (githubConfig.token) {
                 loadFromGitHub();
+            } else {
+                // Ensure privacy notice is visible if no token
+                console.log('No GitHub token found - showing privacy notice');
             }
         });
 

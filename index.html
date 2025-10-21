@@ -209,6 +209,29 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.85em;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background: #5568d3;
+        }
+
+        th.sortable::after {
+            content: ' ↕';
+            opacity: 0.5;
+            font-size: 0.8em;
+        }
+
+        th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
         }
 
         tbody tr:hover {
@@ -580,11 +603,11 @@
             <table id="expensesTable" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Data</th>
-                        <th>Fornecedor</th>
-                        <th>Descrição</th>
-                        <th>Nota Fiscal</th>
-                        <th style="text-align: right;">Valor</th>
+                        <th class="sortable sorted-desc" onclick="sortBy('date')">Data</th>
+                        <th class="sortable" onclick="sortBy('fornecedor')">Fornecedor</th>
+                        <th class="sortable" onclick="sortBy('descricao')">Descrição</th>
+                        <th class="sortable" onclick="sortBy('notaFiscal')">Nota Fiscal</th>
+                        <th class="sortable" style="text-align: right;" onclick="sortBy('valor')">Valor</th>
                         <th style="text-align: center;">Ação</th>
                     </tr>
                 </thead>
@@ -666,6 +689,8 @@
 
         let expenses = [];
         let editingIndex = -1; // -1 means not editing, >= 0 means editing that index
+        let sortColumn = 'date'; // Current sort column
+        let sortDirection = 'desc'; // 'asc' or 'desc'
         let githubConfig = {
             token: '',
             owner: 'weslleycamilo',
@@ -975,13 +1000,77 @@
             }
         }
 
+        // Sort expenses by current sort settings
+        function sortExpenses() {
+            expenses.sort((a, b) => {
+                let aVal = a[sortColumn];
+                let bVal = b[sortColumn];
+
+                // Special handling for date
+                if (sortColumn === 'date') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                }
+
+                // Special handling for valor (numeric)
+                if (sortColumn === 'valor') {
+                    aVal = parseFloat(aVal);
+                    bVal = parseFloat(bVal);
+                }
+
+                // String comparison (for fornecedor, descricao, notaFiscal)
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+
+                let comparison = 0;
+                if (aVal > bVal) comparison = 1;
+                if (aVal < bVal) comparison = -1;
+
+                return sortDirection === 'asc' ? comparison : -comparison;
+            });
+        }
+
+        // Sort by column
+        function sortBy(column) {
+            // Toggle direction if clicking same column
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            // Update header classes
+            const headers = document.querySelectorAll('th.sortable');
+            headers.forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            const currentHeader = Array.from(headers).find(th =>
+                th.textContent.toLowerCase().includes(column.toLowerCase()) ||
+                (column === 'date' && th.textContent.includes('Data')) ||
+                (column === 'fornecedor' && th.textContent.includes('Fornecedor')) ||
+                (column === 'descricao' && th.textContent.includes('Descrição')) ||
+                (column === 'notaFiscal' && th.textContent.includes('Nota Fiscal')) ||
+                (column === 'valor' && th.textContent.includes('Valor'))
+            );
+
+            if (currentHeader) {
+                currentHeader.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+
+            renderExpenses();
+        }
+
         // Render all expenses
         function renderExpenses() {
             const tbody = document.getElementById('expensesTableBody');
             tbody.innerHTML = '';
 
-            // Sort by date descending
-            expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+            // Sort expenses
+            sortExpenses();
 
             expenses.forEach((expense, index) => {
                 const row = createExpenseRow(expense, index);

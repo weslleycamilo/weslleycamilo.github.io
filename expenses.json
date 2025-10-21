@@ -1,0 +1,18 @@
+{
+  "expenses": [
+    {
+      "date": "2025-09-29",
+      "fornecedor": "Perci Reis & Cia LTDA",
+      "descricao": "Tijolos 11,5x19x19",
+      "notaFiscal": "NF-e 11780",
+      "valor": 1400.00
+    },
+    {
+      "date": "2025-10-01",
+      "fornecedor": "José Carlos Montibeler",
+      "descricao": "Serviços de reforma em geral",
+      "notaFiscal": "NFS-e 1",
+      "valor": 6000.00
+    }
+  ]
+}

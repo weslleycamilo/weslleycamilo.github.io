@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .header-buttons {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-header {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .btn-header:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .summary-card .amount {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .input-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .input-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.9em;
+        }
+        
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-add:active {
+            transform: translateY(0);
+        }
+        
+        .expenses-table {
+            padding: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .amount-cell {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .total-row {
+            background: #f0f4ff;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .total-row td {
+            border-top: 2px solid #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .date {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .btn-delete {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background 0.3s;
+        }
+        
+        .btn-delete:hover {
+            background: #ff3838;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .message.success {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        .message.info {
+            background: #3498db;
+            color: white;
+        }
+        
+        .message.error {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .message.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+        
+        .modal-content textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-modal {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-buttons">
+                <button class="btn-header" onclick="exportData()">📥 Exportar JSON</button>
+                <button class="btn-header" onclick="showImportModal()">📤 Importar JSON</button>
+                <button class="btn-header" onclick="loadFromGitHub()">🔄 Recarregar</button>
+            </div>
+            <h1>📊 Controle de Gastos</h1>
+            <p>Reforma da Igreja - União Sul Brasileira</p>
+        </div>
+        
+        <div class="summary">
+            <div class="summary-card">
+                <h3>Total de Notas</h3>
+                <div class="amount" id="totalNotes">0</div>
+            </div>
+            <div class="summary-card">
+                <h3>Total Gasto</h3>
+                <div class="amount" id="totalAmount">R$ 0,00</div>
+            </div>
+            <div class="summary-card">
+                <h3>Média por Nota</h3>
+                <div class="amount" id="avgAmount">R$ 0,00</div>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <h2>➕ Adicionar Nova Despesa</h2>
+            <div class="message success" id="successMessage">
+                ✓ Despesa adicionada com sucesso!
+            </div>
+            <div class="message info" id="infoMessage"></div>
+            <div class="message error" id="errorMessage"></div>
+            <form id="expenseForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data *</label>
+                        <input type="date" id="inputDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fornecedor *</label>
+                        <input type="text" id="inputFornecedor" placeholder="Nome do fornecedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição *</label>
+                        <input type="text" id="inputDescricao" placeholder="O que foi comprado" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nota Fiscal *</label>
+                        <input type="text" id="inputNotaFiscal" placeholder="NF-e 12345" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$) *</label>
+                        <input type="text" id="inputValor" placeholder="1.234,56" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-add">➕ Adicionar Despesa</button>
+            </form>
+        </div>
+        
+        <div class="expenses-table">
+            <h2 style="margin-bottom: 10px;">Detalhamento de Gastos</h2>
+            <div id="loadingIndicator" class="loading">Carregando dados</div>
+            <table id="expensesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Fornecedor</th>
+                        <th>Descrição</th>
+                        <th>Nota Fiscal</th>
+                        <th style="text-align: right;">Valor</th>
+                        <th style="text-align: center;">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="expensesTableBody">
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right; padding-right: 20px;">TOTAL GERAL</td>
+                        <td id="totalFooter" style="text-align: right; color: #667eea;">R$ 0,00</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <h2>📤 Importar Dados JSON</h2>
+            <p style="margin-bottom: 15px; color: #666;">Cole o conteúdo do arquivo JSON abaixo:</p>
+            <textarea id="importTextarea" placeholder='{"expenses": [...]}'></textarea>
+            <div class="modal-buttons">
+                <button class="btn-modal btn-primary" onclick="importData()">Importar</button>
+                <button class="btn-modal btn-secondary" onclick="closeImportModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - UPDATE THIS URL TO YOUR GITHUB RAW FILE
+        const GITHUB_DATA_URL = 'https://raw.githubusercontent.com/weslleycamilo/weslleycamilo.github.io/main/expenses.json';
+        
+        let expenses = [];
+        
+        // Set today's date as default
+        document.getElementById('inputDate').valueAsDate = new Date();
+        
+        // Load data on page load
+        window.addEventListener('load', () => {
+            loadFromGitHub();
+        });
+        
+        // Load data from GitHub
+        async function loadFromGitHub() {
+            showMessage('info', '🔄 Carregando dados do GitHub...');
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('expensesTable').style.display = 'none';
+            
+            try {
+                const response = await fetch(GITHUB_DATA_URL + '?t=' + new Date().getTime());
+                
+                if (!response.ok) {
+                    throw new Error('Arquivo não encontrado');
+                }
+                
+                const data = await response.json();
+                expenses = data.expenses || [];
+                
+                renderExpenses();
+                showMessage('success', '✓ Dados carregados com sucesso!');
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('expensesTable').style.display = 'table';
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showMessage('error', '❌ Erro ao carregar dados do GitHub. Usando dados locais.');
+                
+                // Load default data if GitHub fails
+                expenses = [
+                    {date: "2025-09-29", fornecedor: "Perci Reis & Cia LTDA", descricao: "Tijolos 11,5x19x19", notaFiscal: "NF-e 11780", valor: 1400.00},
+                    {date: "2025-10-01", fornecedor: "José Carlos Montibeler", descricao: "Serviços de reforma em geral", notaFiscal: "NFS-e 1", valor: 6000.00},
+                    {date: "2025-10-07", fornecedor: "Águas Claras Materiais", descricao: "Cimento, Cal, Ferro 5/16", notaFiscal: "NF-e 104483", valor: 647.41},
+                    {date: "2025-10-13", fornecedor: "Perci Reis & Cia LTDA", descricao: "Tijolos 11,5x19x19", notaFiscal: "NF-e 11805", valor: 149.00},
+                    {date: "2025-10-15", fornecedor: "Prime Forros e Divisórias", descricao: "Forro PVC, Perfis, Roda forro", notaFiscal: "NF-e 128", valor: 3500.00},
+                    {date: "2025-10-15", fornecedor: "Alverbs Materiais Elétricos", descricao: "Quadro distribuição, cabos, fita isolante, plafon LED", notaFiscal: "NF-e 35", valor: 1580.00},
+                    {date: "2025-08-18", fornecedor: "SB Aquecedores", descricao: "Broca para concreto, Caixa de descarga", notaFiscal: "Relatório Gerencial", valor: 53.05},
+                    {date: "2025-09-26", fornecedor: "DANFE - Comercio", descricao: "Areia fina (transporte)", notaFiscal: "NF 47813", valor: 475.00}
+                ];
+                
+                renderExpenses();
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('expensesTable').style.display = 'table';
+            }
+        }
+        
+        // Render all expenses
+        function renderExpenses() {
+            const tbody = document.getElementById('expensesTableBody');
+            tbody.innerHTML = '';
+            
+            // Sort by date descending
+            expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            expenses.forEach((expense, index) => {
+                const row = createExpenseRow(expense, index);
+                tbody.appendChild(row);
+            });
+            
+            updateSummary();
+        }
+        
+        // Create expense row
+        function createExpenseRow(expense, index) {
+            const row = document.createElement('tr');
+            row.setAttribute('data-index', index);
+            
+            const dateObj = new Date(expense.date + 'T00:00:00');
+            const dateFormatted = dateObj.toLocaleDateString('pt-BR');
+            
+            const valorFormatted = expense.valor.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            
+            row.innerHTML = `
+                <td class="date">${dateFormatted}</td>
+                <td>${expense.fornecedor}</td>
+                <td>${expense.descricao}</td>
+                <td>${expense.notaFiscal}</td>
+                <td class="amount-cell" style="text-align: right;">${valorFormatted}</td>
+                <td style="text-align: center;"><button class="btn-delete" onclick="deleteExpense(${index})">🗑️ Excluir</button></td>
+            `;
+            
+            return row;
+        }
+        
+        // Handle form submission
+        document.getElementById('expenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('inputDate').value;
+            const fornecedor = document.getElementById('inputFornecedor').value;
+            const descricao = document.getElementById('inputDescricao').value;
+            const notaFiscal = document.getElementById('inputNotaFiscal').value;
+            const valorInput = document.getElementById('inputValor').value;
+            
+            // Format value
+            const valorClean = valorInput.replace(/[^\d,]/g, '').replace(',', '.');
+            const valorNum = parseFloat(valorClean);
+            
+            if (isNaN(valorNum)) {
+                showMessage('error', '❌ Por favor, insira um valor válido (ex: 1234,56)');
+                return;
+            }
+            
+            // Add to expenses array
+            const newExpense = {
+                date: date,
+                fornecedor: fornecedor,
+                descricao: descricao,
+                notaFiscal: notaFiscal,
+                valor: parseFloat(valorNum.toFixed(2))
+            };
+            
+            expenses.push(newExpense);
+            
+            // Re-render
+            renderExpenses();
+            
+            // Show success and export prompt
+            showMessage('success', '✓ Despesa adicionada! Clique em "Exportar JSON" para salvar.');
+            
+            // Clear form
+            this.reset();
+            document.getElementById('inputDate').valueAsDate = new Date();
+        });
+        
+        // Delete expense
+        function deleteExpense(index) {
+            if (confirm('Tem certeza que deseja excluir esta despesa?')) {
+                expenses.splice(index, 1);
+                renderExpenses();
+                showMessage('info', 'Despesa excluída. Exporte o JSON para salvar as alterações.');
+            }
+        }
+        
+        // Export data as JSON
+        function exportData() {
+            const dataStr = JSON.stringify({expenses: expenses}, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'expenses.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showMessage('success', '✓ Arquivo JSON exportado! Agora faça upload no GitHub.');
+        }
+        
+        // Show import modal
+        function showImportModal() {
+            document.getElementById('importModal').classList.add('show');
+        }
+        
+        // Close import modal
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('show');
+            document.getElementById('importTextarea').value = '';
+        }
+        
+        // Import data from JSON
+        function importData() {
+            const jsonText = document.getElementById('importTextarea').value;
+            
+            try {
+                const data = JSON.parse(jsonText);
+                
+                if (!data.expenses || !Array.isArray(data.expenses)) {
+                    throw new Error('Formato inválido');
+                }
+                
+                expenses = data.expenses;
+                renderExpenses();
+                closeImportModal();
+                showMessage('success', '✓ Dados importados com sucesso!');
+            } catch (error) {
+                showMessage('error', '❌ Erro ao importar: JSON inválido');
+            }
+        }
+        
+        // Update summary
+        function updateSummary() {
+            let total = 0;
+            
+            expenses.forEach(expense => {
+                total += expense.valor;
+            });
+            
+            const count = expenses.length;
+            const avg = count > 0 ? total / count : 0;
+            
+            document.getElementById('totalNotes').textContent = count;
+            document.getElementById('totalAmount').textContent = total.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            document.getElementById('avgAmount').textContent = avg.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+            document.getElementById('totalFooter').textContent = total.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
+        }
+        
+        // Show message
+        function showMessage(type, text) {
+            const msgId = type + 'Message';
+            const msgEl = document.getElementById(msgId);
+            msgEl.textContent = text;
+            msgEl.classList.add('show');
+            
+            setTimeout(() => {
+                msgEl.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Auto-format currency input
+        document.getElementById('inputValor').addEventListener('blur', function() {
+            let value = this.value.replace(/[^\d,]/g, '');
+            if (value) {
+                const num = parseFloat(value.replace(',', '.'));
+                if (!isNaN(num)) {
+                    this.value = num.toFixed(2).replace('.', ',');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

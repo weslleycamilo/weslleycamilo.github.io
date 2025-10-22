@@ -1,6 +1,13 @@
 {
   "expenses": [
     {
+      "date": "2025-10-21",
+      "fornecedor": "Ferro Velho Torresani LTDA",
+      "descricao": "Placa de Isopor Lisa 30MM",
+      "notaFiscal": "NF-e9913",
+      "valor": 80
+    },
+    {
       "date": "2025-10-15",
       "fornecedor": "Alverbs Materiais Elétricos",
       "descricao": "Quadro distribuição, cabos, fita isolante, plafon LED",

@@ -1,6 +1,13 @@
 {
   "expenses": [
     {
+      "date": "2025-10-22",
+      "fornecedor": "Aguas Claras - Materias construção",
+      "descricao": "Cimento Votoran 50kg, Cal Hidratado 20kg",
+      "notaFiscal": "NF-e 104",
+      "valor": 145.44
+    },
+    {
       "date": "2025-10-21",
       "fornecedor": "Ferro Velho Torresani LTDA",
       "descricao": "Placa de Isopor Lisa 30MM",

@@ -1,6 +1,13 @@
 {
   "expenses": [
     {
+      "date": "2025-11-27",
+      "fornecedor": "Comercio e Extração de areia NH LTDA",
+      "descricao": "Areia Laje/Concreto\t",
+      "notaFiscal": "NF- 48116",
+      "valor": 145
+    },
+    {
       "date": "2025-10-22",
       "fornecedor": "Aguas Claras - Materias construção",
       "descricao": "Cimento Votoran 50kg, Cal Hidratado 20kg",

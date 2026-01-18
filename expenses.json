@@ -1,6 +1,13 @@
 {
   "expenses": [
     {
+      "date": "2025-12-15",
+      "fornecedor": "Prime forros e divisorias ltda",
+      "descricao": "Perfil cartolinha e Pendural 3M",
+      "notaFiscal": "NF-e 151",
+      "valor": 450
+    },
+    {
       "date": "2025-11-27",
       "fornecedor": "Comercio e Extração de areia NH LTDA",
       "descricao": "Areia Laje/Concreto\t",
